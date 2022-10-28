@@ -137,7 +137,7 @@ class MoveAbleObject extends RenderProxyBox {
     Size childSize = child?.getDryLayout(constraints) ?? Size.zero;
     int maxNodeCount = max(inputCount, outputCount);
     var offset = Size(childSize.width + 3 * nodeSize.toDouble(),
-        max(childSize.height, (2 * maxNodeCount - 1) * nodeSize.toDouble()));
+        max(childSize.height, (2 * maxNodeCount + 1) * nodeSize.toDouble()));
     return constraints.constrain(offset);
   }
 }

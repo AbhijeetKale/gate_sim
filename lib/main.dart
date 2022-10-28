@@ -49,15 +49,8 @@ class MyHomePageState extends State<MyHomePage> {
         },
         child: const Icon(Icons.place),
       ),
-      body: Center(
-        child: Container(
-          height: 200,
-          width: 200,
-          child: LogicGateWidget(
-            inputCount: 4,
-            child: Center(child: Text("And Gate")),
-          ),
-        ),
+      body: DrawingBoard(
+        lines: [Line([Offset.zero, Offset(10.0, 30.0)])],
       ),
     );
   }

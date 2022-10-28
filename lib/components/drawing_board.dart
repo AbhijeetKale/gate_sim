@@ -17,10 +17,16 @@ class _DrawingBoardState extends State<DrawingBoard> {
     return CustomPaint(
 //      painter: LinePainter(widget.lines ?? []),
       child: Stack(
-        children: [
-          LogicGateWidget(
-            child: Container(
-              color: Colors.black,
+        children: const [
+          Positioned(
+            left: 10,
+            top: 10,
+            child: LogicGateWidget(
+              child: Center(
+                child: Text(
+                  "And gate"
+                ),
+              ),
             ),
           ),
         ],

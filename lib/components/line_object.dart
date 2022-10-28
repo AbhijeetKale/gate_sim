@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class Line {
   final List<Offset> linePoints;
 
-  Line(this.linePoints) : assert(linePoints.length > 2);
+  Line(this.linePoints) : assert(linePoints.length >= 2);
 
   @override
   bool operator ==(Object other) => other is Line && _equals(other);
