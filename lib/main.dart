@@ -1,6 +1,9 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:gate_sim/components/line_object.dart';
 import 'package:gate_sim/components/drawing_board.dart';
+import 'package:gate_sim/components/moveable_object.dart';
 
 void main() {
   runApp(const MyApp());
@@ -22,8 +25,15 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => MyHomePageState();
+}
+
+class MyHomePageState extends State<MyHomePage> {
+  double width = 50.0;
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +41,23 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Home page"),
       ),
-      body: DrawingBoard(
-       lines: [Line([Offset.zero, Offset(100, 100), Offset(100, 200)])],
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            width = Random().nextInt(200).toDouble();
+          });
+        },
+        child: const Icon(Icons.place),
+      ),
+      body: Center(
+        child: Container(
+          height: 200,
+          width: 200,
+          child: LogicGateWidget(
+            inputCount: 4,
+            child: Center(child: Text("And Gate")),
+          ),
+        ),
       ),
     );
   }

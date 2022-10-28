@@ -18,9 +18,7 @@ class _DrawingBoardState extends State<DrawingBoard> {
 //      painter: LinePainter(widget.lines ?? []),
       child: Stack(
         children: [
-          MoveAbleObjectWidget(
-            height: 100,
-            width: 200,
+          LogicGateWidget(
             child: Container(
               color: Colors.black,
             ),
