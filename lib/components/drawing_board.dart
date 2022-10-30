@@ -48,15 +48,37 @@ class _DrawingBoardState extends State<DrawingBoard> {
 
   @override
   Widget build(BuildContext context) {
-    return FractionallySizedBox(
-      heightFactor: 0.8,
-      child: CustomPaint(
-//      painter: LinePainter(widget.lines ?? []),
-        child: Stack(
-          children: _buildNodeWidget(),
-        ),
-      ),
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey)
+            ),
+            height: constraints.maxHeight * 0.9,
+            child: InteractiveViewer(
+              child: CustomPaint(
+                child: Stack(
+                  children: _buildNodeWidget(),
+                ),
+              ),
+            ),
+          ),
+          ButtonBar(
+            children: [
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      circuit.addNode(Node(position: Offset(200, 200)));
+                    });
+                  },
+                  child: Text("And Gate"))
+            ],
+          )
+        ],
+      );
+    });
   }
 }
 
