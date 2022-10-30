@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:gate_sim/components/line_object.dart';
 import 'package:gate_sim/components/drawing_board.dart';
-import 'package:gate_sim/components/moveable_object.dart';
+import 'package:gate_sim/components/logic_gate_box.dart';
+import 'package:gate_sim/models/circuit.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,17 +42,19 @@ class MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: const Text("Home page"),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            width = Random().nextInt(200).toDouble();
-          });
-        },
-        child: const Icon(Icons.place),
-      ),
       body: DrawingBoard(
-        lines: [Line([Offset.zero, Offset(10.0, 30.0)])],
+        circuit: Circuit(circuitComponents: [Node(outputConnections: [])]),
       ),
     );
+  }
+}
+
+class CircuitHolderWidget extends InheritedWidget {
+  const CircuitHolderWidget({required Widget child, Key? key})
+      : super(child: child, key: key);
+
+  @override
+  bool updateShouldNotify(covariant InheritedWidget oldWidget) {
+    return true;
   }
 }

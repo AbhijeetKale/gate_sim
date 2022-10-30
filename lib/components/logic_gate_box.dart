@@ -23,11 +23,11 @@ class LogicGateWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      MoveAbleObject(inputCount, outputCount, nodeSize);
+      LogicGateBox(inputCount, outputCount, nodeSize);
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant MoveAbleObject renderObject) {
+      BuildContext context, covariant LogicGateBox renderObject) {
     renderObject
       ..inputCount = inputCount
       ..outputCount = outputCount
@@ -35,14 +35,14 @@ class LogicGateWidget extends SingleChildRenderObjectWidget {
   }
 }
 
-class MoveAbleObject extends RenderProxyBox {
+class LogicGateBox extends RenderProxyBox {
   int _inputCount;
 
   int _outputCount;
 
   int _nodeSize;
 
-  MoveAbleObject(this._inputCount, this._outputCount, this._nodeSize,
+  LogicGateBox(this._inputCount, this._outputCount, this._nodeSize,
       [RenderBox? child])
       : assert(_inputCount > 0),
         assert(_outputCount > 0),
@@ -69,6 +69,9 @@ class MoveAbleObject extends RenderProxyBox {
     _nodeSize = value;
     markNeedsLayout();
   }
+
+  @override
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
