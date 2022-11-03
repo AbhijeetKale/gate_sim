@@ -23,26 +23,47 @@ class LogicGateWidget extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      MoveAbleObject(inputCount, outputCount, nodeSize);
+      LogicGateBox(inputCount, outputCount, nodeSize);
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant MoveAbleObject renderObject) {
+      BuildContext context, covariant LogicGateBox renderObject) {
     renderObject
       ..inputCount = inputCount
       ..outputCount = outputCount
-      ..nodeSize = nodeSize;
+      ..nodeSize = nodeSize
+      ..child = renderObject.child;
   }
 }
 
-class MoveAbleObject extends RenderProxyBox {
+class InputHitTestEntry extends BoxHitTestEntry {
+  final int inputNo;
+
+  InputHitTestEntry(this.inputNo, RenderBox target, Offset localPosition)
+      : assert(inputNo > 0),
+        super(target, localPosition);
+}
+
+class OutputHitTestEntry extends BoxHitTestEntry {
+  final int outputNo;
+
+  OutputHitTestEntry(this.outputNo, RenderBox target, Offset localPosition)
+      : assert(outputNo > 0),
+        super(target, localPosition);
+}
+
+class LogicGateBox extends RenderProxyBox {
   int _inputCount;
 
   int _outputCount;
 
   int _nodeSize;
 
-  MoveAbleObject(this._inputCount, this._outputCount, this._nodeSize,
+  List<Rect> inputNodeLayout = [];
+
+  List<Rect> outputNodeLayout = [];
+
+  LogicGateBox(this._inputCount, this._outputCount, this._nodeSize,
       [RenderBox? child])
       : assert(_inputCount > 0),
         assert(_outputCount > 0),
@@ -63,12 +84,56 @@ class MoveAbleObject extends RenderProxyBox {
     markNeedsLayout();
   }
 
+  @override
+  set child(RenderBox? newValue) {
+    super.child = newValue;
+    markNeedsLayout();
+  }
+
   int get nodeSize => _nodeSize;
 
   set nodeSize(int value) {
     _nodeSize = value;
     markNeedsLayout();
   }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (size.contains(position) &&
+        (hitTestChildren(result, position: position) ||
+            hitTestSelf(position))) {
+      int? inputNodeNo = _hitTestForInputNodes(inputNodeLayout, position);
+      if (inputNodeNo != null) {
+        result.add(InputHitTestEntry(inputNodeNo, this, position));
+        return true;
+      }
+      int? outputNodeNo = _hitTestForInputNodes(inputNodeLayout, position);
+      if (outputNodeNo != null) {
+        result.add(OutputHitTestEntry(outputNodeNo, this, position));
+        return true;
+      }
+      result.add(BoxHitTestEntry(this, position));
+    }
+    return false;
+  }
+
+  int? _hitTestForInputNodes(List<Rect> nodeLayout, Offset localPosition) {
+    int nodeNo = 0;
+    for (Rect rect in inputNodeLayout) {
+      if (rect.contains(localPosition)) {
+        return nodeNo;
+      }
+      nodeNo++;
+    }
+    return null;
+  }
+
+  @override
+  void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -88,36 +153,43 @@ class MoveAbleObject extends RenderProxyBox {
   }
 
   void _drawInputNodes(Canvas canvas) {
-    double inputGap =
-        (size.height - (inputCount * nodeSize)) / (inputCount + 1);
     Paint inputPaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.fill;
-    double currentStartPoint = 0;
-    for (int i = 0; i < inputCount; i++) {
-      currentStartPoint += inputGap;
-      Rect rect;
-      canvas.drawRect(
-          Rect.fromLTWH(
-              0, currentStartPoint, nodeSize.toDouble(), nodeSize.toDouble()),
-          inputPaint);
-      currentStartPoint += nodeSize;
+    for (Rect inputRect in outputNodeLayout) {
+      canvas.drawRect(inputRect, inputPaint);
     }
   }
 
   void _drawOutputNodes(Canvas canvas) {
-    double outputGap =
-        (size.height - (outputCount * nodeSize)) / (outputCount + 1);
-    Paint inputPaint = Paint()
+    Paint outputPaint = Paint()
       ..color = Colors.black
       ..style = PaintingStyle.fill;
+    for (Rect outputRect in outputNodeLayout) {
+      canvas.drawRect(outputRect, outputPaint);
+    }
+  }
+
+  void _calculateLocalInputOutputOffset() {
+    // calculating inputs offsets
+    double inputGap =
+        (size.height - (inputCount * nodeSize)) / (inputCount + 1);
     double currentStartPoint = 0;
+    for (int i = 0; i < inputCount; i++) {
+      currentStartPoint += inputGap;
+      inputNodeLayout.add(Rect.fromLTWH(
+          0, currentStartPoint, nodeSize.toDouble(), nodeSize.toDouble()));
+      currentStartPoint += nodeSize;
+    }
+
+    // calculating output node offsets
+    double outputGap =
+        (size.height - (outputCount * nodeSize)) / (outputCount + 1);
+    currentStartPoint = 0;
     for (int i = 0; i < outputCount; i++) {
       currentStartPoint += outputGap;
-      canvas.drawRect(
-          Rect.fromLTWH(size.width - nodeSize, currentStartPoint,
-              nodeSize.toDouble(), nodeSize.toDouble()),
-          inputPaint);
+      outputNodeLayout.add(Rect.fromLTWH(size.width - nodeSize,
+          currentStartPoint, nodeSize.toDouble(), nodeSize.toDouble()));
       currentStartPoint += nodeSize;
     }
   }
@@ -129,6 +201,7 @@ class MoveAbleObject extends RenderProxyBox {
         "This generally happens if the all input nodes cannot be fitted into the logic gate\nnodeSize = $nodeSize, no of output nodes = $inputCount max height available = ${constraints.maxHeight}");
     assert(constraints.maxHeight > outputCount * nodeSize,
         "This generally happens if the all output nodes cannot be fitted into the logic gate\nnodeSize = $nodeSize, no of output nodes = $outputCount max height available = ${constraints.maxHeight}");
+    _calculateLocalInputOutputOffset();
     child?.layout(BoxConstraints(maxHeight: size.height, maxWidth: size.width));
   }
 

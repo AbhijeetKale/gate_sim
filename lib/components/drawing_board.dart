@@ -1,37 +1,84 @@
 import 'package:flutter/material.dart';
 import 'package:gate_sim/components/line_object.dart';
-import 'package:gate_sim/components/moveable_object.dart';
+import 'package:gate_sim/components/logic_gate_box.dart';
+import 'package:gate_sim/models/circuit.dart';
 
 class DrawingBoard extends StatefulWidget {
-  final List<Line>? lines;
+  final Circuit? circuit;
 
-  const DrawingBoard({Key? key, this.lines}) : super(key: key);
+  const DrawingBoard({Key? key, this.circuit}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DrawingBoardState();
 }
 
 class _DrawingBoardState extends State<DrawingBoard> {
+  late Circuit circuit;
+
+  @override
+  void initState() {
+    super.initState();
+    circuit = widget.circuit ?? Circuit();
+  }
+
+  List<Widget> _buildNodeWidget() {
+    List<Widget> result = [];
+    for (Node node in circuit.nodes) {
+      result.add(
+        Positioned(
+          left: node.position.dx,
+          top: node.position.dy,
+          child: GestureDetector(
+            onPanUpdate: (DragUpdateDetails details) {
+              setState(() {
+                node.position += details.delta;
+              });
+            },
+            child: LogicGateWidget(
+              inputCount: node.maxPossibleInputCount,
+              outputCount: node.maxPossibleOutputCount,
+              child: Center(child: Text(node.label ?? node.id)),
+            ),
+          ),
+        ),
+      );
+    }
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-//      painter: LinePainter(widget.lines ?? []),
-      child: Stack(
-        children: const [
-          Positioned(
-            left: 10,
-            top: 10,
-            child: LogicGateWidget(
-              child: Center(
-                child: Text(
-                  "And gate"
+    return LayoutBuilder(builder: (context, constraints) {
+      return Column(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey)
+            ),
+            height: constraints.maxHeight * 0.9,
+            child: InteractiveViewer(
+              child: CustomPaint(
+                child: Stack(
+                  children: _buildNodeWidget(),
                 ),
               ),
             ),
           ),
+          ButtonBar(
+            children: [
+              TextButton(
+                  onPressed: () {
+                    setState(() {
+                      circuit.addNode(Node(position: Offset(200, 200)));
+                    });
+                  },
+                  child: Text("And Gate"))
+            ],
+          )
         ],
-      ),
-    );
+      );
+    });
   }
 }
 
