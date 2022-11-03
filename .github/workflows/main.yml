@@ -11,6 +11,9 @@ jobs:
     name: Check App Build
     runs-on: ubuntu-latest
     steps:
+      - name: Analyzing App Code
+        run: flutter analyze
       - name: Flutter App build
-        if: github.event_name != 'push'
         run: ci/build.sh dev
+      - name: Running Tests
+        run: flutter test
