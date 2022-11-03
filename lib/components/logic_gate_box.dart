@@ -130,9 +130,6 @@ class LogicGateBox extends RenderProxyBox {
 
   @override
   void handleEvent(PointerEvent event, covariant HitTestEntry entry) {
-    // TODO: implement handleEvent
-    super.handleEvent(event, entry);
-    if (event.)
   }
 
   @override
